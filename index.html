@@ -439,6 +439,57 @@
   .update-bar .info { color:#64748B; }
   .update-bar .info strong { color:#94A3B8; }
   .btn-refresh { margin-left:auto; padding:6px 16px; background:rgba(34,211,238,0.15); color:#22D3EE; border:1px solid rgba(34,211,238,0.3); border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; }
+
+  /* Toolbar buttons (fullscreen + view toggle) */
+  .toolbar-btn {
+    padding:6px 14px; background:rgba(20,184,166,0.15); color:#14B8A6;
+    border:1px solid rgba(20,184,166,0.3); border-radius:8px;
+    font-size:11px; font-weight:600; cursor:pointer; display:flex;
+    align-items:center; gap:6px; transition:all 0.2s;
+  }
+  .toolbar-btn:hover { background:rgba(20,184,166,0.25); }
+  .toolbar-btn.active { background:rgba(34,211,238,0.2); color:#22D3EE; border-color:rgba(34,211,238,0.4); }
+  .toolbar-btn svg { width:14px; height:14px; }
+
+  /* ─── MOBILE VIEW (toggled via .mobile-view class on body) ─── */
+  body.mobile-view .dash { padding:12px 8px; }
+  body.mobile-view .header { flex-direction:column; align-items:flex-start; gap:10px; padding:14px; }
+  body.mobile-view .header h1 { font-size:18px; }
+  body.mobile-view .header-right { text-align:left; align-self:flex-start; }
+  body.mobile-view .header-right .period { font-size:13px; }
+  body.mobile-view .update-bar { flex-wrap:wrap; padding:8px 12px; font-size:11px; gap:8px; }
+  body.mobile-view .update-bar .info { width:100%; order:2; }
+  body.mobile-view .update-bar .dot-live { order:1; }
+  body.mobile-view .btn-refresh, body.mobile-view .toolbar-btn { padding:5px 10px; font-size:10px; }
+  body.mobile-view .kpi-strip { grid-template-columns:1fr 1fr !important; gap:8px; }
+  body.mobile-view .kpi { padding:10px 12px; }
+  body.mobile-view .kpi-label { font-size:9px; }
+  body.mobile-view .kpi-val { font-size:14px; }
+  body.mobile-view .kpi-delta { font-size:9px; }
+  body.mobile-view .row-3-2 { grid-template-columns:1fr !important; }
+  body.mobile-view .card { padding:14px; }
+  body.mobile-view .card-title { font-size:13px; }
+  body.mobile-view .card-sub { font-size:10px; }
+  body.mobile-view .chart-box.h360 { height:240px; }
+  body.mobile-view .chart-box.h320 { height:220px; }
+  body.mobile-view .chart-box.h240 { height:180px; }
+  body.mobile-view .legend { flex-wrap:wrap; gap:8px; font-size:10px; }
+  body.mobile-view .tbl { font-size:10px; }
+  body.mobile-view .tbl th, body.mobile-view .tbl td { padding:6px 4px; }
+  body.mobile-view .fc-summary { grid-template-columns:1fr 1fr !important; gap:8px; }
+  body.mobile-view .fc-card { padding:10px 12px; }
+
+  /* Auto mobile when screen < 700px (mesmo sem toggle) */
+  @media (max-width: 700px) {
+    .header { flex-direction:column; align-items:flex-start; gap:10px; }
+    .kpi-strip { grid-template-columns:1fr 1fr !important; }
+    .row-3-2 { grid-template-columns:1fr !important; }
+  }
+
+  /* Fullscreen tweaks */
+  :fullscreen .dash { max-width:100%; padding:16px 24px; }
+  :fullscreen body { background:var(--bg-0); overflow:auto; }
+
 </style>
 </head>
 <body>
@@ -457,6 +508,14 @@
     <div class="update-bar">
       <div class="dot-live"></div>
       <div class="info">Conectado ao <strong>Google Sheets</strong> · Última atualização: <strong id="last-update"></strong></div>
+      <button class="toolbar-btn" id="btnView" onclick="toggleViewMode()" title="Alternar Desktop / Mobile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+        <span id="viewLabel">Desktop</span>
+      </button>
+      <button class="toolbar-btn" onclick="toggleFullscreen()" title="Tela Cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span>Tela Cheia</span>
+      </button>
       <button class="btn-refresh" onclick="loadFromSheets()">Atualizar Dados</button>
     </div>
 
@@ -610,6 +669,46 @@ async function readCell(sheetName, range) {
 // ══════════════════════════════════════════════════
 // LOAD DATA — endereço de célula direto (sem ambiguidade)
 // ══════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════
+// TOOLBAR: Fullscreen + View Toggle (Desktop/Mobile)
+// ══════════════════════════════════════════════════
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(err => alert('Erro: ' + err.message));
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+function toggleViewMode() {
+  const isMobile = document.body.classList.toggle('mobile-view');
+  const btn = document.getElementById('btnView');
+  const lbl = document.getElementById('viewLabel');
+  if (isMobile) {
+    lbl.textContent = 'Mobile';
+    btn.classList.add('active');
+    localStorage.setItem('dashView', 'mobile');
+  } else {
+    lbl.textContent = 'Desktop';
+    btn.classList.remove('active');
+    localStorage.setItem('dashView', 'desktop');
+  }
+  // Resize charts after layout change
+  setTimeout(() => { if (window.charts) window.charts.forEach(c => c.resize()); }, 250);
+}
+
+// Auto-detect mobile on first load
+function autoDetectView() {
+  const saved = localStorage.getItem('dashView');
+  const isNarrow = window.innerWidth < 700;
+  if (saved === 'mobile' || (saved === null && isNarrow)) {
+    document.body.classList.add('mobile-view');
+    document.getElementById('viewLabel').textContent = 'Mobile';
+    document.getElementById('btnView').classList.add('active');
+  }
+}
+
 async function loadFromSheets() {
   document.getElementById('loading-state').style.display = 'block';
   document.getElementById('dashboard-content').style.display = 'none';
@@ -756,7 +855,7 @@ const fmtR = v => 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maxi
 const fmtI = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 
 // Store chart instances for cleanup on reload
-let charts = [];
+let charts = window.charts = [];
 
 function renderDashboard(d) {
   // Destroy previous charts
@@ -930,6 +1029,7 @@ function renderDashboard(d) {
 // ══════════════════════════════════════════════════
 // AUTO-LOAD
 // ══════════════════════════════════════════════════
+autoDetectView();
 loadFromSheets();
 </script>
 </body>
