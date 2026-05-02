@@ -451,39 +451,112 @@
   .toolbar-btn.active { background:rgba(34,211,238,0.2); color:#22D3EE; border-color:rgba(34,211,238,0.4); }
   .toolbar-btn svg { width:14px; height:14px; }
 
-  /* ─── MOBILE VIEW (toggled via .mobile-view class on body) ─── */
-  body.mobile-view .dash { padding:12px 8px; }
-  body.mobile-view .header { flex-direction:column; align-items:flex-start; gap:10px; padding:14px; }
-  body.mobile-view .header h1 { font-size:18px; }
-  body.mobile-view .header-right { text-align:left; align-self:flex-start; }
-  body.mobile-view .header-right .period { font-size:13px; }
-  body.mobile-view .update-bar { flex-wrap:wrap; padding:8px 12px; font-size:11px; gap:8px; }
-  body.mobile-view .update-bar .info { width:100%; order:2; }
-  body.mobile-view .update-bar .dot-live { order:1; }
-  body.mobile-view .btn-refresh, body.mobile-view .toolbar-btn { padding:5px 10px; font-size:10px; }
-  body.mobile-view .kpi-strip { grid-template-columns:1fr 1fr !important; gap:8px; }
-  body.mobile-view .kpi { padding:10px 12px; }
-  body.mobile-view .kpi-label { font-size:9px; }
-  body.mobile-view .kpi-val { font-size:14px; }
-  body.mobile-view .kpi-delta { font-size:9px; }
-  body.mobile-view .row-3-2 { grid-template-columns:1fr !important; }
-  body.mobile-view .card { padding:14px; }
-  body.mobile-view .card-title { font-size:13px; }
-  body.mobile-view .card-sub { font-size:10px; }
-  body.mobile-view .chart-box.h360 { height:240px; }
-  body.mobile-view .chart-box.h320 { height:220px; }
-  body.mobile-view .chart-box.h240 { height:180px; }
-  body.mobile-view .legend { flex-wrap:wrap; gap:8px; font-size:10px; }
-  body.mobile-view .tbl { font-size:10px; }
-  body.mobile-view .tbl th, body.mobile-view .tbl td { padding:6px 4px; }
-  body.mobile-view .fc-summary { grid-template-columns:1fr 1fr !important; gap:8px; }
-  body.mobile-view .fc-card { padding:10px 12px; }
+  /* ─── MOBILE VIEW — Layout otimizado para celular ─── */
+  body.mobile-view { background: var(--bg-0); }
+  body.mobile-view .dash { padding: 10px 8px; max-width: 100%; }
 
-  /* Auto mobile when screen < 700px (mesmo sem toggle) */
+  /* Header compacto */
+  body.mobile-view .header {
+    flex-direction: column; align-items: stretch; gap: 0;
+    padding: 14px 16px; margin-bottom: 12px; border-radius: 12px;
+  }
+  body.mobile-view .header h1 { font-size: 18px; line-height: 1.3; }
+  body.mobile-view .header h1 span { font-size: 18px; }
+  body.mobile-view .header .sub { font-size: 10.5px; margin-top: 2px; }
+  body.mobile-view .tags { gap: 5px; margin-top: 8px; }
+  body.mobile-view .tag { font-size: 9px; padding: 3px 8px; }
+  body.mobile-view .header-right {
+    text-align: left; margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border); align-self: stretch;
+  }
+  body.mobile-view .header-right .period { font-size: 11px; font-weight: 600; }
+
+  /* Update bar — compacto, botões alinhados */
+  body.mobile-view .update-bar {
+    flex-wrap: wrap; padding: 10px 12px; font-size: 10.5px;
+    gap: 8px; margin-bottom: 12px; border-radius: 10px;
+  }
+  body.mobile-view .update-bar .info {
+    width: 100%; order: 1; font-size: 10px; line-height: 1.5;
+  }
+  body.mobile-view .update-bar .dot-live { display: none; }
+  body.mobile-view .toolbar-btn,
+  body.mobile-view .btn-refresh {
+    padding: 7px 11px; font-size: 10px; flex: 1; justify-content: center;
+    margin-left: 0 !important;
+  }
+  body.mobile-view .toolbar-btn span, body.mobile-view .btn-refresh { white-space: nowrap; }
+
+  /* KPI cards — grid 2 colunas, valores destacados */
+  body.mobile-view .kpi-strip {
+    grid-template-columns: 1fr 1fr !important; gap: 8px; margin-bottom: 14px;
+  }
+  body.mobile-view .kpi {
+    padding: 12px 13px; border-radius: 12px;
+  }
+  body.mobile-view .kpi-label {
+    font-size: 8.5px; letter-spacing: 0.6px; margin-bottom: 6px;
+  }
+  body.mobile-view .kpi-val {
+    font-size: 15px; line-height: 1.2; margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  body.mobile-view .kpi-delta { font-size: 9.5px; line-height: 1.3; }
+  /* Primeiro KPI ocupa linha inteira (saldo final é o destaque) */
+  body.mobile-view .kpi:first-child { grid-column: 1 / -1; }
+  body.mobile-view .kpi:first-child .kpi-val { font-size: 22px; }
+  body.mobile-view .kpi:first-child .kpi-label { font-size: 9.5px; }
+
+  /* Rows: tudo empilhado */
+  body.mobile-view .row { margin-bottom: 12px; }
+  body.mobile-view .row-3-2 { grid-template-columns: 1fr !important; gap: 12px; }
+
+  /* Cards: padding reduzido, mas respiráveis */
+  body.mobile-view .card { padding: 14px 13px; border-radius: 12px; }
+  body.mobile-view .card-title { font-size: 13px; margin-bottom: 2px; }
+  body.mobile-view .card-sub { font-size: 10px; margin-bottom: 12px; }
+
+  /* Charts: alturas adequadas para portrait */
+  body.mobile-view .chart-box.h360 { height: 260px; }
+  body.mobile-view .chart-box.h320 { height: 230px; }
+  body.mobile-view .chart-box.h240 { height: 220px; }
+
+  /* Legenda: wrap limpo, fonte menor */
+  body.mobile-view .legend {
+    flex-wrap: wrap; gap: 10px 14px; font-size: 10px; margin-bottom: 10px;
+  }
+  body.mobile-view .leg-item { gap: 5px; }
+  body.mobile-view .leg-dot, body.mobile-view .leg-line { width: 12px; }
+
+  /* Tabelas: compactas mas legíveis */
+  body.mobile-view .tbl { font-size: 10.5px; }
+  body.mobile-view .tbl th {
+    padding: 8px 4px; font-size: 9px; letter-spacing: 0.4px;
+  }
+  body.mobile-view .tbl td { padding: 9px 4px; }
+  /* Esconde a coluna empresa em telas bem pequenas para dar espaço ao valor */
+  body.mobile-view .tbl th:nth-child(3), body.mobile-view .tbl td:nth-child(3) {
+    display: none;
+  }
+
+  /* Forecast summary: 2x2 grid bonito */
+  body.mobile-view .fc-summary {
+    grid-template-columns: 1fr 1fr !important; gap: 8px; margin-top: 14px;
+  }
+  body.mobile-view .fc-card { padding: 11px 12px; border-radius: 10px; }
+  body.mobile-view .fc-label { font-size: 9px; }
+  body.mobile-view .fc-val { font-size: 13px; }
+  body.mobile-view .fc-delta { font-size: 9px; }
+
+  /* Footer */
+  body.mobile-view .footer { font-size: 10px; padding: 14px 8px; }
+
+  /* Auto mobile when screen < 700px */
   @media (max-width: 700px) {
-    .header { flex-direction:column; align-items:flex-start; gap:10px; }
-    .kpi-strip { grid-template-columns:1fr 1fr !important; }
-    .row-3-2 { grid-template-columns:1fr !important; }
+    .header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .kpi-strip { grid-template-columns: 1fr 1fr !important; }
+    .row-3-2 { grid-template-columns: 1fr !important; }
+    .fc-summary { grid-template-columns: 1fr 1fr !important; }
   }
 
   /* Fullscreen tweaks */
