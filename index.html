@@ -433,19 +433,31 @@
   .error-box h3 { color:#F43F5E; margin-bottom:8px; }
   .error-box p { font-size:13px; color:#94A3B8; }
   .btn-retry { margin-top:12px; padding:8px 20px; background:rgba(34,211,238,0.15); color:#22D3EE; border:1px solid rgba(34,211,238,0.3); border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; }
-  .update-bar { display:flex; align-items:center; gap:12px; background:#151D2F; border:1px solid #2A3550; border-radius:10px; padding:10px 20px; margin-bottom:24px; font-size:12px; }
-  .dot-live { width:8px; height:8px; border-radius:50%; background:#10B981; animation:pulse 2s infinite; }
+  .update-bar {
+    display:flex; align-items:center; gap:12px; background:#151D2F;
+    border:1px solid #2A3550; border-radius:10px; padding:10px 20px;
+    margin-bottom:24px; font-size:12px; flex-wrap:wrap;
+  }
+  .dot-live { width:8px; height:8px; border-radius:50%; background:#10B981; animation:pulse 2s infinite; flex-shrink:0; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .update-bar .info { color:#64748B; }
+  .update-bar .info { color:#64748B; flex:1 1 200px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .update-bar .info strong { color:#94A3B8; }
-  .btn-refresh { margin-left:auto; padding:6px 16px; background:rgba(34,211,238,0.15); color:#22D3EE; border:1px solid rgba(34,211,238,0.3); border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; }
+  /* Grupo de botões à direita — mantém todos juntos, sempre visíveis */
+  .toolbar-actions {
+    display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap;
+  }
+  .btn-refresh {
+    padding:6px 16px; background:rgba(34,211,238,0.15); color:#22D3EE;
+    border:1px solid rgba(34,211,238,0.3); border-radius:8px;
+    font-size:11px; font-weight:600; cursor:pointer; flex-shrink:0;
+  }
 
   /* Toolbar buttons (fullscreen + view toggle) */
   .toolbar-btn {
     padding:6px 14px; background:rgba(20,184,166,0.15); color:#14B8A6;
     border:1px solid rgba(20,184,166,0.3); border-radius:8px;
     font-size:11px; font-weight:600; cursor:pointer; display:flex;
-    align-items:center; gap:6px; transition:all 0.2s;
+    align-items:center; gap:6px; transition:all 0.2s; flex-shrink:0;
   }
   .toolbar-btn:hover { background:rgba(20,184,166,0.25); }
   .toolbar-btn svg { width:14px; height:14px; }
@@ -453,7 +465,7 @@
   /* Toggle Desktop/Mobile com estados ativos distintos */
   .view-toggle {
     display:flex; gap:0; background:rgba(15,23,42,0.6); border:1px solid #2A3550;
-    border-radius:8px; padding:3px; overflow:hidden;
+    border-radius:8px; padding:3px; flex-shrink:0;
   }
   .vt-btn {
     padding:5px 12px; background:transparent; color:#64748B;
@@ -617,21 +629,23 @@
     <div class="update-bar">
       <div class="dot-live"></div>
       <div class="info">Conectado ao <strong>Google Sheets</strong> · Última atualização: <strong id="last-update"></strong></div>
-      <div class="view-toggle">
-        <button class="vt-btn" id="btnDesktop" onclick="setViewMode('desktop')" title="Versão Desktop">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          <span>Desktop</span>
+      <div class="toolbar-actions">
+        <div class="view-toggle">
+          <button class="vt-btn" id="btnDesktop" onclick="setViewMode('desktop')" title="Versão Desktop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Desktop</span>
+          </button>
+          <button class="vt-btn" id="btnMobile" onclick="setViewMode('mobile')" title="Versão Mobile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span>Mobile</span>
+          </button>
+        </div>
+        <button class="toolbar-btn" onclick="toggleFullscreen()" title="Tela Cheia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <span>Tela Cheia</span>
         </button>
-        <button class="vt-btn" id="btnMobile" onclick="setViewMode('mobile')" title="Versão Mobile">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span>Mobile</span>
-        </button>
+        <button class="btn-refresh" onclick="loadFromSheets()">Atualizar Dados</button>
       </div>
-      <button class="toolbar-btn" onclick="toggleFullscreen()" title="Tela Cheia">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-        <span>Tela Cheia</span>
-      </button>
-      <button class="btn-refresh" onclick="loadFromSheets()">Atualizar Dados</button>
     </div>
 
     <div class="header">
