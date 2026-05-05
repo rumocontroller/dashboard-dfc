@@ -543,7 +543,7 @@
   /* Charts: alturas adequadas para portrait */
   body.mobile-view .chart-box.h360 { height: 260px; }
   body.mobile-view .chart-box.h320 { height: 230px; }
-  body.mobile-view .chart-box.h240 { height: 220px; }
+  body.mobile-view .chart-box.h240 { height: 280px; }  /* +altura para legenda inferior do pie */
 
   /* Legenda: wrap limpo, fonte menor */
   body.mobile-view .legend {
@@ -558,10 +558,22 @@
     padding: 8px 4px; font-size: 9px; letter-spacing: 0.4px;
   }
   body.mobile-view .tbl td { padding: 9px 4px; }
-  /* Esconde a coluna empresa em telas bem pequenas para dar espaço ao valor */
-  body.mobile-view .tbl th:nth-child(3), body.mobile-view .tbl td:nth-child(3) {
+  /* Esconde APENAS a coluna Empresa da tabela de Despesas (3ª col),
+     preservando a coluna Valor da tabela de Receitas (que só tem 3 cols) */
+  body.mobile-view .tbl-desp th:nth-child(3),
+  body.mobile-view .tbl-desp td:nth-child(3) {
     display: none;
   }
+  /* Valores em vermelho (Despesas) e verde (Receitas): maiores e bold no mobile */
+  body.mobile-view .tbl-desp td:last-child {
+    font-size: 13px !important; font-weight: 700 !important;
+    white-space: nowrap; letter-spacing: -0.2px;
+  }
+  body.mobile-view #tbRec td:last-child {
+    font-size: 13px !important; font-weight: 700 !important;
+    white-space: nowrap; letter-spacing: -0.2px;
+  }
+  body.mobile-view #tbRec td:nth-child(2) { font-size: 11px; }
 
   /* Forecast summary: 2x2 grid bonito */
   body.mobile-view .fc-summary {
@@ -673,7 +685,7 @@
       <div class="card">
         <div class="card-title">Top 10 Despesas — Realizado</div>
         <div class="card-sub">Maiores saídas de caixa acumuladas</div>
-        <table class="tbl">
+        <table class="tbl tbl-desp">
           <thead><tr><th style="width:32px">#</th><th>Conta</th><th style="width:90px">Empresa</th><th style="width:110px">Valor</th></tr></thead>
           <tbody id="tbDesp"></tbody>
         </table>
@@ -1005,10 +1017,19 @@ function renderDashboard(d) {
 
   // 1. SALDO BAR CHART
   const realBars = d.saldoOrc.map((v,i) => i < nR ? d.saldoReal[i] : null);
-  // Mobile: barras um pouco mais gordas (sem cortar)
+  // Mobile: barras um pouco mais gordas + Y-axis compacto (sem cortar)
   const isMobileBar = document.body.classList.contains('mobile-view') || window.innerWidth < 700;
   const barPct = isMobileBar ? 0.6 : 0.45;
   const catPct = isMobileBar ? 0.85 : 0.7;
+  // Formato compacto para mobile: "2,5M" / "850k" em vez de "R$ 2.500k"
+  const fmtCompact = v => {
+    const a = Math.abs(v);
+    if (a >= 1e6) return (v/1e6).toFixed(1).replace('.',',') + 'M';
+    if (a >= 1e3) return Math.round(v/1e3) + 'k';
+    return Math.round(v).toString();
+  };
+  const yTickFmt = isMobileBar ? fmtCompact : fmt;
+  const yFontSize = isMobileBar ? 9 : 11;
   charts.push(new Chart(document.getElementById('chartSaldo'), {
     type: 'bar',
     data: {
@@ -1020,9 +1041,10 @@ function renderDashboard(d) {
     },
     options: {
       responsive:true, maintainAspectRatio:false,
+      layout: { padding: { right: isMobileBar ? 4 : 8 } },
       scales: {
-        x: { grid:{display:false}, ticks:{font:{weight:'600'}} },
-        y: { grid:{color:grd}, ticks:{callback:fmt,maxTicksLimit:7}, beginAtZero:true }
+        x: { grid:{display:false}, ticks:{font:{weight:'600',size:yFontSize}} },
+        y: { grid:{color:grd}, ticks:{callback:yTickFmt,maxTicksLimit:6,font:{size:yFontSize}}, beginAtZero:true }
       },
       plugins: { tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtR(ctx.parsed.y) } } }
     }
@@ -1080,8 +1102,19 @@ function renderDashboard(d) {
     },
     options: {
       responsive:true, maintainAspectRatio:false, cutout:'58%',
+      layout: { padding: isMobileBar ? { top: 4, bottom: 0 } : { top: 0 } },
       plugins: {
-        legend: { display:true, position:'right', labels:{boxWidth:8,padding:10,font:{size:10},color:'#94A3B8'} },
+        legend: {
+          display: true,
+          position: isMobileBar ? 'bottom' : 'right',
+          align: isMobileBar ? 'start' : 'center',
+          labels: {
+            boxWidth: isMobileBar ? 10 : 8,
+            padding: isMobileBar ? 8 : 10,
+            font: { size: isMobileBar ? 10 : 10 },
+            color: '#94A3B8'
+          }
+        },
         tooltip: { callbacks: { label: ctx => { const t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ctx.label+': '+fmt(ctx.parsed)+' ('+((ctx.parsed/t)*100).toFixed(1)+'%)'; } } }
       }
     }
